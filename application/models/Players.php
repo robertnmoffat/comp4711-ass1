@@ -15,14 +15,22 @@ class Players extends CI_Model {
 		return $query->result_array();
 	}
 	
-	// This totally doesn't work yet.. -B
-	/*
+	//Get a specific player
 	function get($pname) {
-		// $query = $this->db->query('select * from players where Player = "' . $pname . '";');
-		$query = $this->db->query('select * from players');
+                $specificPlayer = "player = '{$pname}'";
+                $this->db->where($specificPlayer);
+		$query = $this->db->get('players');
 		return $query->result_array();
 	}
-	*/
+        
+        //Get a list of all the player names
+        function getnames(){
+            $this->db->order_by("Player");
+            $this->db->select('Player');
+            $query = $this->db->get('players');
+            return $query->result_array();
+        }
+	
 	
 	/*
 	function newest() {
