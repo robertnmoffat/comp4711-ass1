@@ -19,67 +19,41 @@ class Welcome extends CI_Controller {
 	 * map to /index.php/welcome/<method_name>
 	 * @see https://codeigniter.com/user_guide/general/urls.html
 	 */
-	public function index()	
-        {
-            $this->data['stocksList'] = $this->getStocks();
-            $this->data['playersList'] = $this->getPlayers();
-            
-            $this->parser->parse('homepage', $this->data);
-            
-            /*
-		// Do it all over again for transactions
-		// Get all tx from model
-		$result = $this->transactions->all();
-		
-		// Build array of formatted cells
-		foreach ($result as $myrow)
-			$cells[] = $this->parser->parse('_transactionsCell', (array) $myrow, true);
-			
-		// prime the table class
-		$this->load->library('table');
-		$parms = array(
-			'table_open' => '<table class="gallery">',
-			'cell_start' => '<td class="homepageCell">',
-			'cell_alt_start' => '<td class="homepageCell">'
-		);
-		$this->table->set_template($parms);
-		
-		// Generate table (finally)
-		$rows = $this->table->make_columns($cells, 1);
-		$this->data['thetable'] = $this->table->generate($rows);
-		
-		// Running this command more than once appends the additional data to page instead of overwriting  -BL
-		$this->parser->parse('justatable', $this->data);
-		
-		
-		
-		// Do it all over again for movements
-		// Get all movements from model
-		$result = $this->movements->all();
-		
-		// Build array of formatted cells
-		foreach ($result as $myrow)
-			$cells[] = $this->parser->parse('_movementsCell', (array) $myrow, true);
-			
-		// prime the table class
-		$this->load->library('table');
-		$parms = array(
-			'table_open' => '<table class="gallery">',
-			'cell_start' => '<td class="homepageCell">',
-			'cell_alt_start' => '<td class="homepageCell">'
-		);
-		$this->table->set_template($parms);
-		
-		// Generate table (finally)
-		$rows = $this->table->make_columns($cells, 1);
-		$this->data['thetable'] = $this->table->generate($rows);
-		
-		// Running this command more than once appends the additional data to page instead of overwriting  -BL
-		$this->parser->parse('justatable', $this->data);
-             * 
-             */
+	public function index()
+	{	
+            $this->load->helper(array('form', 'url'));
 
+            $this->load->library('form_validation');
+            
+            $this->form_validation->set_rules('username', 'Username', 'required');
+            $this->form_validation->set_rules('password', 'Password', 'required');
+
+            if ($this->form_validation->run() == FALSE && !isset($this->session->userdata['logged_on']))
+            {
+                    $this->load->view('_logonform');
+            }
+            else
+                {
+                if (isset($this->session->userdata["logged_on"])) {
+                    $this->data['username'] = $this->session->userdata["username"];
+                } else {
+                $this->session->set_userdata("logged_on", true);
+                $this->data['username'] = $this->input->post('username');
+                }
+
+                $this->session->set_userdata("username", $this->data['username']);
+                $this->data['stocksList'] = $this->getStocks();
+                $this->data['playersList'] = $this->getPlayers();
+
+                $this->parser->parse('homepage', $this->data);
+                }
 	}
+        
+        public function logout() {
+            $this->session->unset_userdata('logged_on');
+            $this->session->sess_destroy();
+            $this->index();
+        }
         
         public function getStocks() {
                 //// Do it all over again for stocks
