@@ -27,7 +27,7 @@ class Players extends CI_Model {
         //Get a list of all the player names
         function getnames(){
             $this->db->order_by("Player");
-            $this->db->select('Player');
+            //$this->db->select('Player');
             $query = $this->db->get('players');
             return $query->result_array();
         }

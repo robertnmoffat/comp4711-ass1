@@ -1,1 +1,0 @@
-<option value='portfolio/user/{Player}'>{Player}</option>

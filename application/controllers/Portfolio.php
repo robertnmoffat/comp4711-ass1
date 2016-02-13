@@ -21,13 +21,19 @@ class Portfolio extends CI_Controller {
 	 */
 	public function index()
 	{
-            $pname = 'Donald';
+            if (isset($this->session->userdata["logged_on"])) {
+                    $pname = $this->session->userdata["username"];
+                } else {
+                    $pname = 'Donald';
+                }
             $this->data['playername'] = $pname;
             $this->data['playerSelection'] = $this->generateDropdownMenu();
-            $this->data['cash'] = '9999';
+            $this->data['cash'] = $this->getPlayerCash($pname);
+            $holdings = $this->getStockAmount($pname);
+            $this->data['holdings'] = $holdings;
             $this->data['transactions'] = $this->getTransactions($pname);         
             
-            $this->parser->parse('portfolio', $this->data);
+            $this->parser->parse('portfolio', $this->data); 
 	}     
         
         //Generate page based on player name passed in url
@@ -44,16 +50,23 @@ class Portfolio extends CI_Controller {
         }
         
         //Generates drop down menu of players
-        public function generateDropdownMenu(){     
-           $playerNames = $this->players->getnames();
-           foreach($playerNames as $playerName)
-               $this->data['names'] = $this->parser->parse('_nameOption', (array) $playerName, true);
-           return $this->parser->parse('_playersDropdown', $this->data);
+        public function generateDropdownMenu(){   
+            $playerNames = $this->players->getnames();
+            $this->load->helper('form');
+            
+            $options = array('pick' => '--Select-a-Player--');
+            foreach($playerNames as $curname){
+            $options[$curname['Player']] = $curname['Player'];                
+            }
+            
+            $js = 'onchange="location = this.options[this.selectedIndex].value;"';
+            
+            return form_dropdown('players', $options, 'pick', $js);
         }
         
         //Get amount of each stock
-    public function getStockAmount($pname) {
-        //get transactions
+        public function getStockAmount($pname) {
+                //get transactions
 		$result = $this->transactions->amountByPlayer($pname);
                 
                 if ($result == NULL){
@@ -78,9 +91,10 @@ class Portfolio extends CI_Controller {
 		// Generate table (finally)
 		$rows = $this->table->make_columns($cells, 1);
 		return $this->table->generate($rows);
-    }
+        }
 
-    public function getTransactions($pname){
+        //Get list of player's transactions by date
+        public function getTransactions($pname){
                 //get transactions
 		$result = $this->transactions->byPlayer($pname);
                 
