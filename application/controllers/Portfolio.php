@@ -21,16 +21,78 @@ class Portfolio extends CI_Controller {
 	 */
 	public function index()
 	{
+            $pname = 'Donald';
+            $this->data['playername'] = $pname;
+            $this->data['playerSelection'] = $this->generateDropdownMenu();
+            $this->data['cash'] = '9999';
+            $this->data['transactions'] = $this->getTransactions($pname);         
+            
+            $this->parser->parse('portfolio', $this->data);
+	}     
+        
+        //Generate page based on player name passed in url
+        public function user($pname){
+            $this->data['playername'] = $pname;
+            $this->data['playerSelection'] = $this->generateDropdownMenu();
+            $this->data['cash'] = $this->getPlayerCash($pname);
+            $holdings = $this->getStockAmount($pname);
+            $this->data['holdings'] = $holdings;
+            $transactions = $this->getTransactions($pname);
+            $this->data['transactions'] = $transactions;
+            
+            $this->parser->parse('portfolio', $this->data);
+        }
+        
+        //Generates drop down menu of players
+        public function generateDropdownMenu(){     
+           $playerNames = $this->players->getnames();
+           foreach($playerNames as $playerName)
+               $this->data['names'] = $this->parser->parse('_nameOption', (array) $playerName, true);
+           return $this->parser->parse('_playersDropdown', $this->data);
+        }
+        
+        //Get amount of each stock
+    public function getStockAmount($pname) {
+        //get transactions
+		$result = $this->transactions->amountByPlayer($pname);
+                
+                if ($result == NULL){
+                    return 'none';
+                }
+                
 		
+		// Build array of formatted cells
+		foreach ($result as $myrow)
+			$cells[] = $this->parser->parse('_playerStockAmountCell', (array) $myrow, true);
+			
+                
+		// prime the table class
+		$this->load->library('table');
+		$parms = array(
+			'table_open' => '<table class="gallery">',
+			'cell_start' => '<td class="homepageCell">',
+			'cell_alt_start' => '<td class="homepageCell">'
+		);
+		$this->table->set_template($parms);
 		
-		// Do it all over again for transactions
-		// Get all tx from model
-		$result = $this->transactions->byPlayer('Donald');
+		// Generate table (finally)
+		$rows = $this->table->make_columns($cells, 1);
+		return $this->table->generate($rows);
+    }
+
+    public function getTransactions($pname){
+                //get transactions
+		$result = $this->transactions->byPlayer($pname);
+                
+                if ($result == NULL){
+                    return 'none';
+                }
 		
 		// Build array of formatted cells
 		foreach ($result as $myrow)
 			$cells[] = $this->parser->parse('_transactionsCell', (array) $myrow, true);
 			
+                
 		// prime the table class
 		$this->load->library('table');
 		$parms = array(
@@ -42,35 +104,13 @@ class Portfolio extends CI_Controller {
 		
 		// Generate table (finally)
 		$rows = $this->table->make_columns($cells, 1);
-		$this->data['thetable'] = $this->table->generate($rows);
-		
-		// Running this command more than once appends the additional data to page instead of overwriting  -BL
-		//$this->parser->parse('justatable', $this->data);
-		
-		
-		// Get all players from model
-		$players = $this->players->get('Donald');
-		
-		// Build array of formatted cells
-		foreach ($players as $playa)
-			$cells[] = $this->parser->parse('_playerCell', (array) $playa, true);
-			
-		// prime the table class
-		$this->load->library('table');
-		$parms = array(
-			'table_open' => '<table class="gallery">',
-			'cell_start' => '<td class="homepageCell">',
-			'cell_alt_start' => '<td class="homepageCell">'
-		);
-		$this->table->set_template($parms);
-		
-		// Generate table (finally)
-		$rows = $this->table->make_columns($cells, 1);
-		$this->data['thetable'] = $this->table->generate($rows);
-		
-		// Running this command more than once appends the additional data to page instead of overwriting  -BL
-		$this->parser->parse('justatable', $this->data);
-
-	}
+		return $this->table->generate($rows);
+        }
+        
+        //Get player's current cash
+        public function getPlayerCash($pname){
+		$players = $this->players->get($pname);		
+                return $players;
+        }
 
 }

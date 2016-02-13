@@ -19,8 +19,9 @@ class Players extends CI_Model {
 	function get($pname) {
                 $specificPlayer = "player = '{$pname}'";
                 $this->db->where($specificPlayer);
-		$query = $this->db->get('players');
-		return $query->result_array();
+		$query = $this->db->get('players')->row()->Cash;
+		return $query;
+                return $query->result_array();
 	}
         
         //Get a list of all the player names
@@ -30,8 +31,9 @@ class Players extends CI_Model {
             $query = $this->db->get('players');
             return $query->result_array();
         }
-	
-	
+        
+        
+      	
 	/*
 	function newest() {
 		$this->db->order_by("id", "desc");

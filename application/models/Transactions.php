@@ -21,5 +21,15 @@ class Transactions extends CI_Model {
 		$query = $this->db->get('transactions');
 		return $query->result_array();            
         }
+        
+        function amountByPlayer($pname){
+                //$this->db->order_by("Stock");
+                $this->db->select('Stock, SUM(Quantity) AS total', FALSE);
+                $checkName = "Player = '{$pname}' AND Trans = 'buy'";
+                $this->db->where($checkName);
+                $this->db->group_by('Stock');
+		$query = $this->db->get('transactions');
+		return $query->result_array();            
+        }
 	
 }
