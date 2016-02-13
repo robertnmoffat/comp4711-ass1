@@ -20,59 +20,13 @@ class Welcome extends CI_Controller {
 	 * @see https://codeigniter.com/user_guide/general/urls.html
 	 */
 	public function index()
-	{
-		
-		// Get all players from model
-		$players = $this->players->all();
-		
-		// Build array of formatted cells
-		foreach ($players as $playa)
-			$cells[] = $this->parser->parse('_playerCell', (array) $playa, true);
-			
-		// prime the table class
-		$this->load->library('table');
-		$parms = array(
-			'table_open' => '<table class="gallery">',
-			'cell_start' => '<td class="homepageCell">',
-			'cell_alt_start' => '<td class="homepageCell">'
-		);
-		$this->table->set_template($parms);
-		
-		// Generate table (finally)
-		$rows = $this->table->make_columns($cells, 1);
-		$this->data['thetable'] = $this->table->generate($rows);
-		
-		// Running this command more than once appends the additional data to page instead of overwriting  -BL
-		$this->parser->parse('justatable', $this->data);
-		
-		
-		
-		// Do it all over again for stocks
-		// Get all stocks from model
-		$result = $this->stocks->all();
-		
-		// Build array of formatted cells
-		foreach ($result as $myrow)
-			$cells[] = $this->parser->parse('_stocksCell', (array) $myrow, true);
-			
-		// prime the table class
-		$this->load->library('table');
-		$parms = array(
-			'table_open' => '<table class="gallery">',
-			'cell_start' => '<td class="homepageCell">',
-			'cell_alt_start' => '<td class="homepageCell">'
-		);
-		$this->table->set_template($parms);
-		
-		// Generate table (finally)
-		$rows = $this->table->make_columns($cells, 1);
-		$this->data['thetable'] = $this->table->generate($rows);
-		
-		// Running this command more than once appends the additional data to page instead of overwriting  -BL
-		$this->parser->parse('justatable', $this->data);
-		
-		
-		
+	{		
+            $this->data['stocksList'] = $this->getStocks();
+            $this->data['playersList'] = $this->getPlayers();
+            
+            $this->parser->parse('homepage', $this->data);
+            
+            /*
 		// Do it all over again for transactions
 		// Get all tx from model
 		$result = $this->transactions->all();
@@ -122,7 +76,55 @@ class Welcome extends CI_Controller {
 		
 		// Running this command more than once appends the additional data to page instead of overwriting  -BL
 		$this->parser->parse('justatable', $this->data);
+             * 
+             */
 
 	}
+        
+        public function getStocks() {
+                //// Do it all over again for stocks
+		// Get all stocks from model
+		$result = $this->stocks->all();
+		
+		// Build array of formatted cells
+		foreach ($result as $myrow)
+			$cells[] = $this->parser->parse('_stocksCell', (array) $myrow, true);
+			
+		// prime the table class
+		$this->load->library('table');
+		$parms = array(
+			'table_open' => '<table class="gallery">',
+			'cell_start' => '<td class="homepageCell">',
+			'cell_alt_start' => '<td class="homepageCell">'
+		);
+		$this->table->set_template($parms);
+		
+		// Generate table (finally)
+		$rows = $this->table->make_columns($cells, 1);
+		return $this->table->generate($rows);
+			
+        }
+        
+        public function getPlayers() {
+            		// Get all players from model
+		$players = $this->players->all();
+		
+		// Build array of formatted cells
+		foreach ($players as $playa)
+			$cells[] = $this->parser->parse('_playerCell', (array) $playa, true);
+			
+		// prime the table class
+		$this->load->library('table');
+		$parms = array(
+			'table_open' => '<table class="gallery">',
+			'cell_start' => '<td class="homepageCell">',
+			'cell_alt_start' => '<td class="homepageCell">'
+		);
+		$this->table->set_template($parms);
+		
+		// Generate table (finally)
+		$rows = $this->table->make_columns($cells, 1);
+		return $this->table->generate($rows);
+        }
 
 }
